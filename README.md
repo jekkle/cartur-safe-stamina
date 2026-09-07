@@ -28,13 +28,21 @@ cd src
 dotnet build
 ```
 
-Build auto-copies the DLL into
-`<Valheim install>/BepInEx/plugins/NoStaminaWhenSafe/`. If your Valheim
-install isn't at the default Steam path, override it:
+Managed DLLs for compiling are read from the raw Steam install
+(`VALHEIM_INSTALL`, defaults to the standard Steam path). The **built plugin**
+is deployed to wherever the game actually loads mods from at runtime — if you
+launch through r2modman/Thunderstore Mod Manager (this repo's default
+assumption), that's a profile folder under
+`%APPDATA%\r2modmanPlus-local\Valheim\profiles\<profile>\BepInEx\plugins\`,
+**not** the Steam install's own `BepInEx/plugins`. Override either path if
+yours differs:
 
 ```
-dotnet build -p:VALHEIM_INSTALL="D:\SteamLibrary\steamapps\common\Valheim"
+dotnet build -p:VALHEIM_INSTALL="D:\SteamLibrary\steamapps\common\Valheim" -p:R2MODMAN_PROFILE="C:\Users\you\AppData\Roaming\r2modmanPlus-local\Valheim\profiles\MyProfile"
 ```
+
+After building, fully quit Valheim through r2modman (not just close the
+window) and relaunch — BepInEx only scans plugins on startup.
 
 ## Config
 
@@ -47,6 +55,8 @@ After first run, edit
 
 ## Untested
 
-Not yet launch-tested in game. Next step: start Valheim, confirm the plugin
-loads (check `BepInEx/LogOutput.log` for "NoStaminaWhenSafe 1.0.0 loaded."),
-and verify stamina behavior in and out of combat.
+Not yet launch-tested in game. Next step: fully restart Valheim via
+r2modman, confirm the plugin loads (check
+`%APPDATA%\r2modmanPlus-local\Valheim\profiles\Default\BepInEx\LogOutput.log`
+for "NoStaminaWhenSafe 1.0.0 loaded."), and verify stamina behavior in and
+out of combat.

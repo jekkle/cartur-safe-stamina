@@ -6,8 +6,10 @@
     <Version>1.0.0</Version>
     <LangVersion>latest</LangVersion>
     <RestoreAdditionalProjectSources>https://nuget.bepinex.dev/v3/index.json</RestoreAdditionalProjectSources>
-    <!-- Point this at your Valheim install if different -->
+    <!-- Managed DLLs come from the raw Steam install -->
     <VALHEIM_INSTALL Condition="'$(VALHEIM_INSTALL)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Valheim</VALHEIM_INSTALL>
+    <!-- Actual play happens through r2modman's Default profile - deploy the built DLL there -->
+    <R2MODMAN_PROFILE Condition="'$(R2MODMAN_PROFILE)' == ''">$(APPDATA)\r2modmanPlus-local\Valheim\profiles\Default</R2MODMAN_PROFILE>
   </PropertyGroup>
 
   <ItemGroup>
@@ -31,13 +33,13 @@
     </Reference>
   </ItemGroup>
 
-  <!-- Auto-deploy built DLL into BepInEx plugins folder -->
+  <!-- Auto-deploy built DLL into the r2modman profile BepInEx actually loads -->
   <Target Name="DeployToPlugins" AfterTargets="Build">
     <ItemGroup>
       <DeployFiles Include="$(TargetDir)$(AssemblyName).dll" />
     </ItemGroup>
-    <MakeDir Directories="$(VALHEIM_INSTALL)\BepInEx\plugins\NoStaminaWhenSafe" />
-    <Copy SourceFiles="@(DeployFiles)" DestinationFolder="$(VALHEIM_INSTALL)\BepInEx\plugins\NoStaminaWhenSafe" />
+    <MakeDir Directories="$(R2MODMAN_PROFILE)\BepInEx\plugins\NoStaminaWhenSafe" />
+    <Copy SourceFiles="@(DeployFiles)" DestinationFolder="$(R2MODMAN_PROFILE)\BepInEx\plugins\NoStaminaWhenSafe" />
   </Target>
 
 </Project>
