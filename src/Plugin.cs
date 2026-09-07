@@ -17,14 +17,17 @@ namespace NoStaminaWhenSafe
         public static ConfigEntry<bool> AffectSprint;
         public static ConfigEntry<bool> AffectJump;
         public static ConfigEntry<bool> AffectBuild;
+        public static ConfigEntry<bool> AffectSwim;
 
         private void Awake()
         {
             SafeRadius = Config.Bind("General", "SafeRadius", 25f,
-                "No stamina cost for sprint/jump/build when no enemy is within this many meters.");
+                "No stamina cost for sprint/jump/build/swim when no enemy is within this many meters.");
             AffectSprint = Config.Bind("General", "AffectSprint", true, "Free sprint stamina when safe.");
             AffectJump = Config.Bind("General", "AffectJump", true, "Free jump stamina when safe.");
             AffectBuild = Config.Bind("General", "AffectBuild", true, "Free build/repair/remove stamina when safe.");
+            AffectSwim = Config.Bind("General", "AffectSwim", true,
+                "Free swim stamina when safe. Note this also removes the drowning risk while safe, since drowning only starts once stamina is empty.");
 
             Harmony.CreateAndPatchAll(typeof(Plugin).Assembly, PluginGuid);
             Logger.LogInfo($"{PluginName} {PluginVersion} loaded.");
@@ -119,6 +122,39 @@ namespace NoStaminaWhenSafe
         {
             if (Plugin.AffectBuild.Value && Plugin.IsSafe(__instance))
                 __result = 0f;
+        }
+    }
+
+    // Swimming: Player.OnSwimming lerps between m_swimStaminaDrainMinSkill and
+    // m_swimStaminaDrainMaxSkill by swim skill, so both ends have to be zeroed for the lerp to
+    // produce 0 at any skill level. Letting the original method still run keeps swim-skill XP
+    // gain intact.
+    //
+    // Side effect worth knowing: OnSwimming starts the drown timer only once stamina is empty
+    // (`if (!HaveStamina()) m_drownDamageTimer += dt`), so free swim stamina also means no
+    // drowning while safe. That's consistent with the mod's intent, and it's why AffectSwim is
+    // its own toggle.
+    [HarmonyPatch(typeof(Player), "OnSwimming")]
+    public static class Patch_OnSwimming
+    {
+        private static float _savedMin;
+        private static float _savedMax;
+
+        static void Prefix(Player __instance, ref float ___m_swimStaminaDrainMinSkill, ref float ___m_swimStaminaDrainMaxSkill)
+        {
+            _savedMin = ___m_swimStaminaDrainMinSkill;
+            _savedMax = ___m_swimStaminaDrainMaxSkill;
+            if (Plugin.AffectSwim.Value && Plugin.IsSafe(__instance))
+            {
+                ___m_swimStaminaDrainMinSkill = 0f;
+                ___m_swimStaminaDrainMaxSkill = 0f;
+            }
+        }
+
+        static void Postfix(ref float ___m_swimStaminaDrainMinSkill, ref float ___m_swimStaminaDrainMaxSkill)
+        {
+            ___m_swimStaminaDrainMinSkill = _savedMin;
+            ___m_swimStaminaDrainMaxSkill = _savedMax;
         }
     }
 }

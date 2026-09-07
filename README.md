@@ -1,19 +1,28 @@
 # NoStaminaWhenSafe
 
-BepInEx/Harmony mod for Valheim. Sprint, jump, and build/repair/remove-piece
-stamina cost drop to zero whenever no hostile character is within a
-configurable radius (default 25m) of the player.
+BepInEx/Harmony mod for Valheim. Sprint, jump, swim, and
+build/repair/remove-piece stamina cost drop to zero whenever no hostile
+character is within a configurable radius (default 25m) of the player.
 
 ## How it works
 
-Three Harmony patches on `Player`:
+Four Harmony patches on `Player`:
 
 - `CheckRun` (sprint drain) — zeroes the `m_runStaminaDrain` field for the
   duration of the original call, then restores it, so skill XP gain and
   other side effects still run.
 - `OnJump` — same trick on `m_jumpStaminaUsage`.
+- `OnSwimming` — zeroes **both** `m_swimStaminaDrainMinSkill` and
+  `m_swimStaminaDrainMaxSkill`, because the drain is a
+  `Mathf.Lerp` between them by swim skill; zeroing one end would still leave a
+  cost at other skill levels. Swim-skill XP still accrues.
 - `GetBuildStamina` — postfix zeroes the returned cost. This single method
   feeds all three build-tool stamina call sites (place, repair, remove).
+
+**Swimming has a side effect worth knowing:** `OnSwimming` only starts the
+drown timer once stamina is empty (`if (!HaveStamina()) m_drownDamageTimer += dt`),
+so free swim stamina also means you can't drown while safe. That follows from
+the mod's premise, and it's why `AffectSwim` is separately toggleable.
 
 Enemy detection uses `Character.GetAllCharacters()` + the game's own
 `BaseAI.IsEnemy(a, b)` hostility check (respects faction/tame/aggro state),
@@ -50,7 +59,7 @@ After first run, edit
 `BepInEx/config/com.jekkle.valheim.nostaminawhensafe.cfg`:
 
 - `SafeRadius` (float, default 25) — meters.
-- `AffectSprint` / `AffectJump` / `AffectBuild` (bool, default true) — toggle
+- `AffectSprint` / `AffectJump` / `AffectBuild` / `AffectSwim` (bool, default true) — toggle
   each independently.
 
 ## Untested
