@@ -2,6 +2,10 @@
 
 *Free, and always will be — if it improved your game you can [tip me on Patreon](https://www.patreon.com/c/cartur).*
 
+**More from Cartur:** [HD Blood](https://thunderstore.io/c/valheim/p/Cartur/Carturs_HD_Blood/) ·
+[Map Pins](https://thunderstore.io/c/valheim/p/Cartur/Carturs_Map_Pins/) ·
+[Compass and Clock](https://thunderstore.io/c/valheim/p/Cartur/Carturs_Compass_and_Clock/)
+
 Stamina costs nothing while nothing is hunting you.
 
 Clearing a forest, sinking a mine shaft, running supplies across the meadows,
@@ -59,12 +63,3 @@ radius would swing for free too, which is precisely when they'd benefit.
 Nothing is replaced outright: every patch either zeroes a cost the game is
 about to charge or restores what it borrowed. Mods that change stamina
 *amounts* stack fine — they set the number, this waives it.
-
-## More from Cartur
-
-- [Cartur's HD Blood](https://thunderstore.io/c/valheim/p/Cartur/Carturs_HD_Blood/) —
-  higher resolution ground blood and a real burst of blood on every hit and kill.
-- [Cartur's Map Pins](https://thunderstore.io/c/valheim/p/Cartur/Carturs_Map_Pins/) —
-  labelled map pins on ore, dungeons, beehives, runestones and boss altars as you find them.
-- [Cartur's Compass and Clock](https://thunderstore.io/c/valheim/p/Cartur/Carturs_Compass_and_Clock/) —
-  a Skyrim-style compass bar showing your pins at their real bearing, plus an in-game clock.

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.2
+
+- Moved the links to my other mods to the top of the page.
+
 ## 1.0.1
 
 - Added links to my other mods.
