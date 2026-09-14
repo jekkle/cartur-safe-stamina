@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
-    <AssemblyName>NoStaminaWhenSafe</AssemblyName>
+    <AssemblyName>CarturSafeStamina</AssemblyName>
     <Version>1.0.0</Version>
     <LangVersion>latest</LangVersion>
     <RestoreAdditionalProjectSources>https://nuget.bepinex.dev/v3/index.json</RestoreAdditionalProjectSources>
@@ -38,8 +38,8 @@
     <ItemGroup>
       <DeployFiles Include="$(TargetDir)$(AssemblyName).dll" />
     </ItemGroup>
-    <MakeDir Directories="$(R2MODMAN_PROFILE)\BepInEx\plugins\NoStaminaWhenSafe" />
-    <Copy SourceFiles="@(DeployFiles)" DestinationFolder="$(R2MODMAN_PROFILE)\BepInEx\plugins\NoStaminaWhenSafe" />
+    <MakeDir Directories="$(R2MODMAN_PROFILE)\BepInEx\plugins\CarturSafeStamina" />
+    <Copy SourceFiles="@(DeployFiles)" DestinationFolder="$(R2MODMAN_PROFILE)\BepInEx\plugins\CarturSafeStamina" />
   </Target>
 
 </Project>

@@ -16,7 +16,7 @@ The fight is still the fight. The chores stop pretending to be one.
 ## What's free when you're safe
 
 Chopping and mining · weapon swings · sprinting · jumping · swimming ·
-building, repairing and removing pieces.
+sneaking · building, repairing and removing pieces.
 
 Each of those is its own switch, so you can leave combat or swimming paying
 full price if you'd rather.
@@ -42,6 +42,12 @@ cached for a quarter second rather than run every frame.
 | `AffectJump` | true | Jump cost. |
 | `AffectBuild` | true | Build, repair, remove piece. |
 | `AffectSwim` | true | Swim drain. |
+| `AffectSneak` | true | Crouch/sneak drain. |
+
+Editing the file by hand works, but
+[ConfigurationManager](https://thunderstore.io/c/valheim/p/shudnal/ConfigurationManager/)
+is easier — install it and every setting here is adjustable in-game from the F1
+menu, no restart needed. It is optional; this mod does not depend on it.
 
 ## Worth knowing
 
@@ -51,8 +57,8 @@ never gets there. That follows from the premise rather than being bolted on,
 and it's why `AffectSwim` has its own switch — turn it off if you want the
 water to stay dangerous.
 
-**Skills still level.** Nothing here skips the original methods, so run, swim
-and weapon XP accrue exactly as they always did.
+**Skills still level.** Nothing here skips the original methods, so run, swim,
+sneak and weapon XP accrue exactly as they always did.
 
 **Other characters pay normally.** The attack patch checks the swinger is you
 before waiving anything — otherwise every boar and draugr inside your safe

@@ -1,8 +1,8 @@
 {
   "name": "Carturs_Safe_Stamina",
-  "version_number": "1.0.2",
+  "version_number": "1.0.3",
   "website_url": "https://github.com/jekkle/cartur-safe-stamina",
-  "description": "Stamina costs nothing while no enemy is near. Chop, mine, sprint, jump, swim and build for free out in the quiet, and pay full price the moment something hostile walks into range. Each cost is separately toggleable.",
+  "description": "Stamina costs nothing while no enemy is near. Chop, mine, sprint, jump, swim, sneak and build for free out in the quiet, and pay full price the moment something hostile walks into range. Each cost is separately toggleable.",
   "dependencies": [
     "denikson-BepInExPack_Valheim-5.4.2333"
   ]
