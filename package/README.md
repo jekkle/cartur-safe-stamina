@@ -4,6 +4,7 @@
 
 **More from Cartur:** [HD Blood](https://thunderstore.io/c/valheim/p/Cartur/Carturs_HD_Blood/) ·
 [Map Pins](https://thunderstore.io/c/valheim/p/Cartur/Carturs_Map_Pins/) ·
+[Follow Command](https://thunderstore.io/c/valheim/p/Cartur/Carturs_Follow_Command/) ·
 [Compass and Clock](https://thunderstore.io/c/valheim/p/Cartur/Carturs_Compass_and_Clock/)
 
 Stamina costs nothing while nothing is hunting you.
@@ -48,6 +49,8 @@ Editing the file by hand works, but
 [ConfigurationManager](https://thunderstore.io/c/valheim/p/shudnal/ConfigurationManager/)
 is easier — install it and every setting here is adjustable in-game from the F1
 menu, no restart needed. It is optional; this mod does not depend on it.
+
+![Every setting in the ConfigurationManager panel](https://raw.githubusercontent.com/jekkle/cartur-safe-stamina/master/docs/images/configuration-manager.png)
 
 ## Worth knowing
 

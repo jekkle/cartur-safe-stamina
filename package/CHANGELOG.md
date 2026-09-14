@@ -6,7 +6,8 @@
   charged `m_sneakStaminaDrain` every tick even with nothing around, which is
   the one movement cost the mod had missed.
 - Documented ConfigurationManager as the easy way to change the settings
-  in-game.
+  in-game, with a screenshot of the panel.
+- Added Follow Command to the links to my other mods.
 
 ## 1.0.2
 
