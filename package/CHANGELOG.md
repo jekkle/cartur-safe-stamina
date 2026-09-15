@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.4
+
+- Page only - the mod itself is unchanged from 1.0.3. Adds a link to Cartur's Flooring,
+  so every mod of mine points at the others.
+
 ## 1.0.3
 
 - Sneaking is now free while safe, on its own `AffectSneak` switch. Crouching
