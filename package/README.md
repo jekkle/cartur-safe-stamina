@@ -6,7 +6,8 @@
 [Map Pins](https://thunderstore.io/c/valheim/p/Cartur/Carturs_Map_Pins/) ·
 [Follow Command](https://thunderstore.io/c/valheim/p/Cartur/Carturs_Follow_Command/) ·
 [Compass and Clock](https://thunderstore.io/c/valheim/p/Cartur/Carturs_Compass_and_Clock/) ·
-[Flooring](https://thunderstore.io/c/valheim/p/Cartur/Carturs_Flooring/)
+[Flooring](https://thunderstore.io/c/valheim/p/Cartur/Carturs_Flooring/) ·
+[UI HUD](https://thunderstore.io/c/valheim/p/Cartur/Carturs_UI_HUD/)
 
 Stamina costs nothing while nothing is hunting you.
 
