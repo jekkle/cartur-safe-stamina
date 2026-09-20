@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.5
+
+- Stamina now refills while swimming and while attacking, when safe. Zeroing a cost was
+  never the same as refilling: `Player.UpdateStats` sets the regen rate to 0 outright
+  while you are swimming off the ground, mid-swing, mid-dodge, wall-running or encumbered,
+  so the bar sat flat instead of filling. It now regenerates on those frames too, as long
+  as nothing hostile is inside `SafeRadius` and the normal post-spend regen delay has
+  passed. Follows the existing switches - the swim case obeys `AffectSwim`, attacks and
+  dodges obey `AffectAttacks`.
+
 ## 1.0.4
 
 - Page only - the mod itself is unchanged from 1.0.3. Adds a link to Cartur's Flooring,

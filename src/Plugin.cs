@@ -11,7 +11,7 @@ namespace CarturSafeStamina
     {
         public const string PluginGuid = "com.jekkle.valheim.cartursafestamina";
         public const string PluginName = "Cartur's Safe Stamina";
-        public const string PluginVersion = "1.0.4";
+        public const string PluginVersion = "1.0.5";
 
         public static ConfigEntry<float> SafeRadius;
         public static ConfigEntry<bool> AffectSprint;
@@ -223,6 +223,65 @@ namespace CarturSafeStamina
         static void Postfix(ref float ___m_sneakStaminaDrain)
         {
             ___m_sneakStaminaDrain = _saved;
+        }
+    }
+
+    // Zeroing a cost is not the same as refilling. Player.UpdateStats(float) kills the regen
+    // rate outright for the frames that matter most:
+    //
+    //     float num = 1f;
+    //     if (IsBlocking()) num *= 0.8f;
+    //     if ((IsSwimming() && !IsOnGround()) || InAttack() || InDodge() || m_wallRunning || flag) num = 0f;
+    //     float num2 = (m_staminaRegen + (1f - m_stamina / maxStamina) * m_staminaRegen * m_staminaRegenTimeMultiplier) * num;
+    //     m_seman.ModifyStaminaRegen(ref staminaMultiplier);  // multiplies - cannot revive a zeroed rate
+    //
+    // (flag is IsEncumbered()). So while swimming or mid-swing the bar sat flat instead of
+    // filling, even with the cost patched to 0. num is a method local, and the only way to
+    // reach a local is a transpiler; re-running that one regen line in a Postfix for exactly
+    // the frames vanilla skipped is smaller and does not break on the next game update.
+    //
+    // The regen delay timer is left alone: it has already been decremented by the original
+    // method, and a value above 0 means something really did spend stamina, so this stays off
+    // until vanilla would have started regenerating anyway. The ZDO stamina write happens
+    // before this runs, so a remote player's view of the bar lags one frame - the local HUD
+    // reads m_stamina directly.
+    [HarmonyPatch(typeof(Player), "UpdateStats", new[] { typeof(float) })]
+    public static class Patch_UpdateStats
+    {
+        static void Postfix(Player __instance, float dt, ref float ___m_stamina, float ___m_staminaRegenTimer)
+        {
+            if (__instance != Player.m_localPlayer || ___m_staminaRegenTimer > 0f)
+                return;
+
+            if (!BlockedAndAllowed(__instance) || !Plugin.IsSafe(__instance))
+                return;
+
+            float max = __instance.GetMaxStamina();
+            if (___m_stamina >= max)
+                return;
+
+            float rate = __instance.m_staminaRegen
+                         + (1f - ___m_stamina / max) * __instance.m_staminaRegen * __instance.m_staminaRegenTimeMultiplier;
+
+            float multiplier = 1f;
+            __instance.GetSEMan().ModifyStaminaRegen(ref multiplier);
+
+            ___m_stamina = Mathf.Min(max, ___m_stamina + rate * multiplier * dt * Game.m_staminaRegenRate);
+        }
+
+        // True only on the frames vanilla zeroed the regen rate, and only when the toggle that
+        // owns that reason is on - swimming belongs to AffectSwim, attacking and dodging to
+        // AffectAttacks. Wall-running and encumbrance have no toggle of their own; encumbrance
+        // drains every frame anyway, which keeps the regen timer above 0 and this dormant.
+        static bool BlockedAndAllowed(Player p)
+        {
+            if (p.IsSwimming() && !p.IsOnGround())
+                return Plugin.AffectSwim.Value;
+
+            if (p.InAttack() || p.InDodge())
+                return Plugin.AffectAttacks.Value;
+
+            return p.IsWallRunning() || p.IsEncumbered();
         }
     }
 }

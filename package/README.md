@@ -24,6 +24,11 @@ sneaking · building, repairing and removing pieces.
 Each of those is its own switch, so you can leave combat or swimming paying
 full price if you'd rather.
 
+The bar also **refills** while you swim and while you swing. Vanilla stops
+regeneration dead during both, so a free swim still left you stranded at
+whatever stamina you went in with; while safe it now climbs back the way it
+does standing still.
+
 ## What counts as safe
 
 No hostile character within `SafeRadius` metres of you — 25 by default.

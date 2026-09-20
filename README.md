@@ -10,7 +10,7 @@ renamed before it was ever published, so there is no old package to migrate.
 
 ## How it works
 
-Six Harmony patches:
+Seven Harmony patches:
 
 - `Attack.GetAttackStamina` — postfix zeroes the returned cost. That one return
   feeds both the spend and its `HaveStamina` gate at all three call sites in
@@ -32,6 +32,19 @@ Six Harmony patches:
   virtual), and everything downstream of it is multiplicative — the skill lerp,
   the equipment modifier, the status-effect pass — so zeroing it is the whole
   cost. Sneak-skill XP still accrues.
+- `Player.UpdateStats(float)` — postfix that regenerates stamina on the frames
+  vanilla refuses to. `UpdateStats` sets the regen rate to `0f` outright when
+  `(IsSwimming() && !IsOnGround()) || InAttack() || InDodge() || m_wallRunning ||
+  IsEncumbered()`, and the status-effect pass that follows is a multiply, so
+  nothing downstream can revive a zeroed rate. Zeroing a cost therefore left the
+  bar flat while swimming or swinging rather than refilling it. The rate is a
+  method local — only a transpiler could reach it — so the postfix re-runs that
+  one regen line for exactly the blocked frames instead. It stays out of the way
+  otherwise: it does nothing unless the regen delay timer has already expired, so
+  a real spend still pauses regeneration normally, and it honours the existing
+  switches (swimming answers to `AffectSwim`, attacks and dodges to
+  `AffectAttacks`). The ZDO stamina write happens before the postfix, so a remote
+  player's view of the bar lags one frame; the local HUD reads `m_stamina`.
 
 `Attack` runs for every character in the world, not just the player, so the
 attack postfix bails unless the attacker is `Player.m_localPlayer`. Without
