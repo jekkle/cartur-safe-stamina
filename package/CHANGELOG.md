@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.6
+
+- Listing only. The store page is rewritten: it leads with what the mod does instead of a
+  links block, the settings table matches the config file, and it links every Cartur mod.
+  No code change.
+
 ## 1.0.5
 
 - Stamina now refills while swimming and while attacking, when safe. Zeroing a cost was

@@ -1,0 +1,16 @@
+[size=4]More from Cartur: [url=https://www.nexusmods.com/valheim/mods/3679]HD Blood[/url], [url=https://www.nexusmods.com/valheim/mods/3681]Map Pins[/url], [url=https://www.nexusmods.com/valheim/mods/3684]Compass and Clock[/url], [url=https://www.nexusmods.com/valheim/mods/3728]Follow Command[/url], [url=https://www.nexusmods.com/valheim/mods/3760]Flooring[/url][/size]
+[color=#d4d4d8]Stamina costs nothing while nothing is hunting you. Clearing a forest, sinking a mine shaft, running supplies across the meadows, throwing up scaffolding - none of it drains the bar. Then something hostile walks into range and every cost comes straight back, at full price, mid-swing. The fight is still the fight. The chores stop pretending to be one.[/color]
+[size=4][b]Installation instructions[/b][/size]
+[color=#d4d4d8]Use a mod manager (Vortex, r2modman, Thunderstore, or Gale) - it pulls in BepInEx for you. Manually: drop CarturSafeStamina.dll into BepInEx/plugins.[/color]
+[size=4][b]Main features[/b][/size]
+[color=#d4d4d8]What's free when you're safe: chopping and mining, weapon swings, sprinting, jumping, swimming, sneaking, building/repairing/removing pieces. Each of those is its own switch, so you can leave combat or swimming paying full price if you'd rather.
+What counts as safe: no hostile character within SafeRadius metres of you (25 by default). Hostility is the game's own BaseAI.IsEnemy check, not a list of prefab names, so tamed animals are ignored, a boar that hasn't noticed you still counts, and anything a mod adds is judged by the same rule as everything else.
+Free swimming also means you can't drown while safe - the game only starts the drown timer once stamina is empty, so a swim that never costs anything never gets there. That's why AffectSwim has its own switch, in case you want the water to stay dangerous.
+Skills still level: nothing here skips the original methods, so run, swim, sneak and weapon XP accrue exactly as they always did.
+Other characters pay normally: the attack patch checks the swinger is you before waiving anything, so boars and draugr near you don't fight for free too.[/color]
+[size=4][b]Configuration[/b][/size]
+[color=#d4d4d8]Settings live in BepInEx/config/com.jekkle.valheim.cartursafestamina.cfg, written on first run: SafeRadius (metres, 25 by default), plus AffectAttacks, AffectSprint, AffectJump, AffectBuild, AffectSwim and AffectSneak, each on by default.
+Editing that file by hand works, but [url=https://thunderstore.io/c/valheim/p/shudnal/ConfigurationManager/]ConfigurationManager[/url] is easier - install it and every setting is adjustable in-game from the F1 menu, no restart needed. It is optional; this mod does not depend on it.[/color]
+[img]https://raw.githubusercontent.com/jekkle/cartur-safe-stamina/master/docs/images/configuration-manager.png[/img]
+[size=4][b]Requirements[/b][/size]
+[color=#d4d4d8]BepInEx pack for Valheim. Nothing is replaced outright: every patch either zeroes a cost the game is about to charge or restores what it borrowed. Mods that change stamina amounts stack fine - they set the number, this waives it.[/color]
