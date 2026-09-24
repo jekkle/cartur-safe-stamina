@@ -14,9 +14,11 @@ Seven Harmony patches:
 
 - `Attack.GetAttackStamina` — postfix zeroes the returned cost. That one return
   feeds both the spend and its `HaveStamina` gate at all three call sites in
-  `Attack`, so chopping, mining and weapon swings are covered by it alone. The
-  bow's `m_drawStaminaDrain` needs no patch: nothing in `assembly_valheim`
-  reads that field, checked instruction by instruction.
+  `Attack`, so chopping, mining and weapon swings are covered by it alone.
+  Holding a **bow drawn** is deliberately not covered: that cost doesn't come
+  through `GetAttackStamina` at all. `ItemData.GetDrawStaminaDrain()` is read
+  only by `Player.UpdateAttackBowDraw`, which spends it per tick while the
+  string is held. Patching it would be a second patch and a separate decision.
 - `Player.CheckRun` (sprint drain) — zeroes the `m_runStaminaDrain` field for
   the duration of the original call, then restores it, so skill XP gain and
   other side effects still run.
@@ -43,7 +45,11 @@ Seven Harmony patches:
   otherwise: it does nothing unless the regen delay timer has already expired, so
   a real spend still pauses regeneration normally, and it honours the existing
   switches (swimming answers to `AffectSwim`, attacks and dodges to
-  `AffectAttacks`). The ZDO stamina write happens before the postfix, so a remote
+  `AffectAttacks`). **Encumbrance is not covered** — being over-loaded still
+  stops your stamina refilling, because vanilla's encumbered *drain* only runs
+  while you're moving (`if (m_moveDir.magnitude > 0.1f)`), so covering the
+  regen block would hand out free stamina for standing still under too much
+  weight. The ZDO stamina write happens before the postfix, so a remote
   player's view of the bar lags one frame; the local HUD reads `m_stamina`.
 
 `Attack` runs for every character in the world, not just the player, so the
@@ -113,11 +119,3 @@ Every value is read at the call site, so
 [ConfigurationManager](https://thunderstore.io/c/valheim/p/shudnal/ConfigurationManager/)
 can change any of them in-game (F1) and it takes effect immediately. Optional —
 nothing here depends on it.
-
-## State
-
-Sprint, jump, build and swim are in-game confirmed. `AffectAttacks` and the
-rename are built and deployed but not yet launch-tested: restart Valheim,
-confirm `Cartur's Safe Stamina 1.0.0 loaded.` in
-`%APPDATA%\r2modmanPlus-local\Valheim\profiles\Default\BepInEx\LogOutput.log`,
-then check a tree costs nothing alone and costs full price with a boar on you.

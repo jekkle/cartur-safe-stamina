@@ -24,7 +24,7 @@ namespace CarturSafeStamina
         private void Awake()
         {
             SafeRadius = Config.Bind("General", "SafeRadius", 25f,
-                "No stamina cost for sprint/jump/build/swim/sneak when no enemy is within this many meters.");
+                "No stamina cost for sprint/jump/build/swim/attacks/sneak when no enemy is within this many meters.");
             AffectSprint = Config.Bind("General", "AffectSprint", true, "Free sprint stamina when safe.");
             AffectJump = Config.Bind("General", "AffectJump", true, "Free jump stamina when safe.");
             AffectBuild = Config.Bind("General", "AffectBuild", true, "Free build/repair/remove stamina when safe.");
@@ -137,9 +137,20 @@ namespace CarturSafeStamina
     //     m_character.UseStamina(GetAttackStamina());                               // DoMeleeAttack
     //     ... HaveStamina(attackStamina); UseStamina(attackStamina);                // the held attack
     //
-    // so zeroing the return covers all of them, gate included. Nothing else to reach for: the bow's
-    // m_drawStaminaDrain field has no consumer anywhere in assembly_valheim, checked instruction by
-    // instruction - it is vestigial in this build, not a second path that was missed.
+    // so zeroing the return covers all of them, gate included.
+    //
+    // One stamina cost on a weapon is deliberately left uncovered: holding a bow drawn. It does not
+    // come through GetAttackStamina. ItemData.m_shared.m_drawStaminaDrain is read by
+    // ItemData.GetDrawStaminaDrain(), whose only caller in assembly_valheim is
+    // Player.UpdateAttackBowDraw, and that method spends it per tick while the string is held:
+    //
+    //     float num = item.GetDrawStaminaDrain();
+    //     ... m_seman.ModifyAttackStaminaUsage(num, ref num, true);
+    //     UseStamina(num * dt);
+    //
+    // An earlier version of this comment claimed the field had no consumer at all. It was wrong.
+    // Covering the bow draw is a second patch and a separate decision, and that decision has not
+    // been made - so drawing a bow still costs stamina inside the safe radius.
     //
     // Attack runs for every character in the world, not just the player, so this checks the
     // attacker is the local player. Without that, every draugr inside the safe radius swings for
@@ -271,8 +282,24 @@ namespace CarturSafeStamina
 
         // True only on the frames vanilla zeroed the regen rate, and only when the toggle that
         // owns that reason is on - swimming belongs to AffectSwim, attacking and dodging to
-        // AffectAttacks. Wall-running and encumbrance have no toggle of their own; encumbrance
-        // drains every frame anyway, which keeps the regen timer above 0 and this dormant.
+        // AffectAttacks. Wall-running has no toggle of its own.
+        //
+        // Encumbrance used to be on that last line too, on the belief that the encumbered drain
+        // runs every frame and so keeps the regen timer above 0, which would have kept this
+        // dormant. That belief was wrong. Player.UpdateStats gates the drain on movement:
+        //
+        //     if (flag)                                   // flag is IsEncumbered()
+        //     {
+        //         if (m_moveDir.magnitude > 0.1f)
+        //             UseStamina(m_encumberedStaminaDrain * dt);
+        //         m_seman.AddStatusEffect(...);           // the "Encumbered" effect
+        //     }
+        //
+        // so a player standing still while over-loaded spends nothing, the regen timer runs down
+        // to 0, and this postfix then refilled the bar through the bare IsEncumbered() branch -
+        // free stamina for standing still under too much weight. Vanilla kills the regen rate for
+        // the whole encumbered state, moving or not, and that is the point of being over-loaded.
+        // This mod is about enemies being absent, not about carry weight.
         static bool BlockedAndAllowed(Player p)
         {
             if (p.IsSwimming() && !p.IsOnGround())
@@ -281,7 +308,7 @@ namespace CarturSafeStamina
             if (p.InAttack() || p.InDodge())
                 return Plugin.AffectAttacks.Value;
 
-            return p.IsWallRunning() || p.IsEncumbered();
+            return p.IsWallRunning();
         }
     }
 }
