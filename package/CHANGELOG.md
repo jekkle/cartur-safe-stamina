@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.7
+
+- **No more free stamina while overloaded.** Standing still and encumbered, the game's own drain
+  never fires - it is gated on movement - so nothing kept the regeneration timer down, and this
+  mod then regenerated anyway. Being over the weight limit costs you again.
+- The setting's description now mentions attacks, which have been covered since 1.0.5.
 ## 1.0.6
 
 - Listing only. The store page is rewritten: it leads with what the mod does instead of a

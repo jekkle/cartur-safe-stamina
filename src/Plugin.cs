@@ -11,7 +11,7 @@ namespace CarturSafeStamina
     {
         public const string PluginGuid = "com.jekkle.valheim.cartursafestamina";
         public const string PluginName = "Cartur's Safe Stamina";
-        public const string PluginVersion = "1.0.6";
+        public const string PluginVersion = "1.0.7";
 
         public static ConfigEntry<float> SafeRadius;
         public static ConfigEntry<bool> AffectSprint;
