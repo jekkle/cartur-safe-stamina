@@ -44,6 +44,10 @@ namespace CarturSafeStamina
         private static bool _lastResult = true;
         private const float CheckInterval = 0.25f;
 
+        /// The four SEMan stamina hooks run for every character; only the local player is free.
+        public static bool IsLocalAndSafe(Character c) =>
+            c is Player player && player == Player.m_localPlayer && IsSafe(player);
+
         public static bool IsSafe(Player player)
         {
             if (player == null)
@@ -78,43 +82,42 @@ namespace CarturSafeStamina
         }
     }
 
-    // Sprint: Player.CheckRun drains m_runStaminaDrain * dt each tick it runs.
-    // Zero the drain field for the duration of the original call, then restore it,
-    // so skill-xp / other side effects in CheckRun still run normally.
-    [HarmonyPatch(typeof(Player), "CheckRun")]
-    public static class Patch_CheckRun
+    // Sprint: Player.CheckRun computes the drain into a local, runs it through
+    // SEMan.ModifyRunStaminaDrain(base, ref drain, dir, minZero), then UseStamina(dt * drain).
+    // Zero the drain at that call instead of zeroing Player.m_runStaminaDrain around CheckRun.
+    //
+    // Root cause of the Speedy Paths clash (read from SpeedyPaths 1.0.9 decompiled): it also wraps
+    // CheckRun with a Prefix that saves m_runStaminaDrain and a Postfix that writes the saved value
+    // back. Two wrappers on one field only work if each Postfix undoes exactly what its own Prefix
+    // did, and that depends on Harmony's ordering. When Speedy Paths' Prefix runs after ours it saves
+    // our 0, its Postfix writes 0 back, and the field stays 0 forever - sprint is free in combat.
+    // The other order drifts the field down a little every frame. Touching no shared field means
+    // there is nothing to clobber. minZero is false only for the tooltip preview in Player
+    // (ModifyRunStaminaDrain(1f, ..., minZero: false)), which must not read as free.
+    [HarmonyPatch(typeof(SEMan), "ModifyRunStaminaDrain")]
+    public static class Patch_RunStaminaDrain
     {
-        private static float _saved;
-
-        static void Prefix(Player __instance, ref float ___m_runStaminaDrain)
+        static void Postfix(ref float drain, bool minZero, Character ___m_character)
         {
-            _saved = ___m_runStaminaDrain;
-            if (Plugin.AffectSprint.Value && Plugin.IsSafe(__instance))
-                ___m_runStaminaDrain = 0f;
-        }
+            if (!minZero || !Plugin.AffectSprint.Value)
+                return;
 
-        static void Postfix(ref float ___m_runStaminaDrain)
-        {
-            ___m_runStaminaDrain = _saved;
+            if (Plugin.IsLocalAndSafe(___m_character))
+                drain = 0f;
         }
     }
 
-    // Jump: Player.OnJump drains m_jumpStaminaUsage. Same zero/restore trick.
-    [HarmonyPatch(typeof(Player), "OnJump")]
-    public static class Patch_OnJump
+    // Jump: Player.OnJump runs the cost through SEMan.ModifyJumpStaminaUsage(cost, ref cost) and
+    // spends the result. Zeroed there rather than by zeroing m_jumpStaminaUsage around OnJump: a
+    // save/restore of a shared field breaks as soon as another mod wraps the same field (the
+    // Speedy Paths sprint clash, 2026-10-01). minZero is false only for the tooltip preview.
+    [HarmonyPatch(typeof(SEMan), "ModifyJumpStaminaUsage")]
+    public static class Patch_JumpStamina
     {
-        private static float _saved;
-
-        static void Prefix(Player __instance, ref float ___m_jumpStaminaUsage)
+        static void Postfix(ref float staminaUse, bool minZero, Character ___m_character)
         {
-            _saved = ___m_jumpStaminaUsage;
-            if (Plugin.AffectJump.Value && Plugin.IsSafe(__instance))
-                ___m_jumpStaminaUsage = 0f;
-        }
-
-        static void Postfix(ref float ___m_jumpStaminaUsage)
-        {
-            ___m_jumpStaminaUsage = _saved;
+            if (minZero && Plugin.AffectJump.Value && Plugin.IsLocalAndSafe(___m_character))
+                staminaUse = 0f;
         }
     }
 
@@ -174,66 +177,34 @@ namespace CarturSafeStamina
         }
     }
 
-    // Swimming: Player.OnSwimming lerps between m_swimStaminaDrainMinSkill and
-    // m_swimStaminaDrainMaxSkill by swim skill, so both ends have to be zeroed for the lerp to
-    // produce 0 at any skill level. Letting the original method still run keeps swim-skill XP
-    // gain intact.
+    // Swimming: Player.OnSwimming lerps the drain by swim skill, runs it through
+    // SEMan.ModifySwimStaminaUsage(num, ref num) and spends it; zeroed there, for the same reason
+    // as jump. Swim-skill XP later in OnSwimming is untouched.
     //
     // Side effect worth knowing: OnSwimming starts the drown timer only once stamina is empty
     // (`if (!HaveStamina()) m_drownDamageTimer += dt`), so free swim stamina also means no
     // drowning while safe. That's consistent with the mod's intent, and it's why AffectSwim is
     // its own toggle.
-    [HarmonyPatch(typeof(Player), "OnSwimming")]
-    public static class Patch_OnSwimming
+    [HarmonyPatch(typeof(SEMan), "ModifySwimStaminaUsage")]
+    public static class Patch_SwimStamina
     {
-        private static float _savedMin;
-        private static float _savedMax;
-
-        static void Prefix(Player __instance, ref float ___m_swimStaminaDrainMinSkill, ref float ___m_swimStaminaDrainMaxSkill)
+        static void Postfix(ref float staminaUse, bool minZero, Character ___m_character)
         {
-            _savedMin = ___m_swimStaminaDrainMinSkill;
-            _savedMax = ___m_swimStaminaDrainMaxSkill;
-            if (Plugin.AffectSwim.Value && Plugin.IsSafe(__instance))
-            {
-                ___m_swimStaminaDrainMinSkill = 0f;
-                ___m_swimStaminaDrainMaxSkill = 0f;
-            }
-        }
-
-        static void Postfix(ref float ___m_swimStaminaDrainMinSkill, ref float ___m_swimStaminaDrainMaxSkill)
-        {
-            ___m_swimStaminaDrainMinSkill = _savedMin;
-            ___m_swimStaminaDrainMaxSkill = _savedMax;
+            if (minZero && Plugin.AffectSwim.Value && Plugin.IsLocalAndSafe(___m_character))
+                staminaUse = 0f;
         }
     }
 
-    // Sneak: Player.OnSneaking is the only thing in assembly_valheim that reads
-    // m_sneakStaminaDrain - Character.OnSneaking is an empty virtual, so the field is the
-    // single source of the cost. Everything downstream of it in that method is multiplicative:
-    //
-    //     use  = dt * m_sneakStaminaDrain * Lerp(1, 0.25, sneakSkill)
-    //     use += use * GetEquipmentSneakStaminaModifier()
-    //     m_seman.ModifySneakStaminaUsage(use, ref use, minZero: true)
-    //
-    // so zeroing the field makes the equipment term zero too, and the minZero flag on the
-    // status-effect pass keeps a negative modifier from pushing it back above 0. Same
-    // zero/restore shape as sprint, which leaves the sneak-skill XP at the tail of the method
-    // running normally.
-    [HarmonyPatch(typeof(Player), "OnSneaking")]
-    public static class Patch_OnSneaking
+    // Sneak: Player.OnSneaking computes the cost, runs it through
+    // SEMan.ModifySneakStaminaUsage(use, ref use) and spends it; zeroed there, for the same reason
+    // as jump. The sneak-skill XP at the tail of the method runs normally.
+    [HarmonyPatch(typeof(SEMan), "ModifySneakStaminaUsage")]
+    public static class Patch_SneakStamina
     {
-        private static float _saved;
-
-        static void Prefix(Player __instance, ref float ___m_sneakStaminaDrain)
+        static void Postfix(ref float staminaUse, bool minZero, Character ___m_character)
         {
-            _saved = ___m_sneakStaminaDrain;
-            if (Plugin.AffectSneak.Value && Plugin.IsSafe(__instance))
-                ___m_sneakStaminaDrain = 0f;
-        }
-
-        static void Postfix(ref float ___m_sneakStaminaDrain)
-        {
-            ___m_sneakStaminaDrain = _saved;
+            if (minZero && Plugin.AffectSneak.Value && Plugin.IsLocalAndSafe(___m_character))
+                staminaUse = 0f;
         }
     }
 
