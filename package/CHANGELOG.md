@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.8
+
+- **Works alongside Speedy Paths.** Both mods changed the same stamina value around the same
+  game call, and together they could leave sprinting free even in combat. Safe Stamina now
+  zeroes the cost at the game's own stamina hook instead, for sprint, jump, swim and sneak, so
+  no other mod's adjustments are disturbed.
+
 ## 1.0.7
 
 - **No more free stamina while overloaded.** Standing still and encumbered, the game's own drain
