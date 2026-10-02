@@ -119,3 +119,9 @@ Every value is read at the call site, so
 [ConfigurationManager](https://thunderstore.io/c/valheim/p/shudnal/ConfigurationManager/)
 can change any of them in-game (F1) and it takes effect immediately. Optional —
 nothing here depends on it.
+
+---
+
+**[Discord](https://discord.gg/nd5RqpwNkz)** — bug reports, install help, and mod requests.
+Bug reports get their own thread so nothing is lost in a chat scroll, and requests are voted on.
+
