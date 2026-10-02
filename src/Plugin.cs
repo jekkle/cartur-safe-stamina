@@ -166,7 +166,8 @@ namespace CarturSafeStamina
         // else is asking Harmony to tolerate a widening it has no reason to.
         static void Postfix(ref float __result, Humanoid ___m_character)
         {
-            if (!Plugin.AffectAttacks.Value || __result == 0f)
+            // A negative cost is stamina handed back by the weapon; zeroing it would eat the refund.
+            if (!Plugin.AffectAttacks.Value || __result <= 0f)
                 return;
 
             if (!(___m_character is Player player) || player != Player.m_localPlayer)
@@ -273,6 +274,11 @@ namespace CarturSafeStamina
         // This mod is about enemies being absent, not about carry weight.
         static bool BlockedAndAllowed(Player p)
         {
+            // Vanilla zeroes regen for the whole encumbered state, moving or not, and the swim and
+            // attack branches below would otherwise bypass that - so encumbered is always vanilla.
+            if (p.IsEncumbered())
+                return false;
+
             if (p.IsSwimming() && !p.IsOnGround())
                 return Plugin.AffectSwim.Value;
 
