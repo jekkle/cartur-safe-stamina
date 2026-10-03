@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.9
+
+- Being over-encumbered never gets free stamina regeneration.
+- Attacks that give stamina back are no longer zeroed.
+
 ## 1.0.8
 
 - **Works alongside Speedy Paths.** Both mods changed the same stamina value around the same
