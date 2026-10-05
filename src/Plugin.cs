@@ -20,6 +20,7 @@ namespace CarturSafeStamina
         public static ConfigEntry<bool> AffectSwim;
         public static ConfigEntry<bool> AffectAttacks;
         public static ConfigEntry<bool> AffectSneak;
+        public static ConfigEntry<string> IgnoredCreatures;
 
         private void Awake()
         {
@@ -33,6 +34,8 @@ namespace CarturSafeStamina
             AffectAttacks = Config.Bind("General", "AffectAttacks", true,
                 "Free attack stamina when safe - chopping wood, mining, and weapon swings all pay through the same cost.");
             AffectSneak = Config.Bind("General", "AffectSneak", true, "Free sneak/crouch stamina when safe.");
+            IgnoredCreatures = Config.Bind("General", "IgnoredCreatures", "",
+                "Comma-separated creatures that never count as an enemy nearby, by prefab name or by the name shown in game (e.g. T.W.I.G). For modded creatures that are hostile by faction but never fight.");
 
             Harmony.CreateAndPatchAll(typeof(Plugin).Assembly, PluginGuid);
             Logger.LogInfo($"{PluginName} {PluginVersion} loaded.");
@@ -71,7 +74,7 @@ namespace CarturSafeStamina
                 if (!BaseAI.IsEnemy(player, c))
                     continue;
 
-                if ((c.transform.position - pos).sqrMagnitude <= sqrRadius)
+                if ((c.transform.position - pos).sqrMagnitude <= sqrRadius && !IsIgnored(c))
                 {
                     _lastResult = false;
                     break;
@@ -79,6 +82,30 @@ namespace CarturSafeStamina
             }
 
             return _lastResult;
+        }
+
+        // GitHub #1: T.W.I.G (a modded creature) is in an enemy faction but never fights, and the
+        // check above only asks IsEnemy, so standing near it cost stamina as if hunted. Alert state
+        // would not help - the reporter says it is always alerted. Named by the player instead.
+        private static string _ignoredRaw;
+        private static readonly HashSet<string> Ignored = new HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
+
+        private static bool IsIgnored(Character c)
+        {
+            string raw = IgnoredCreatures.Value ?? "";
+            if (raw != _ignoredRaw)
+            {
+                _ignoredRaw = raw;
+                Ignored.Clear();
+                foreach (string name in raw.Split(','))
+                    if (name.Trim().Length > 0)
+                        Ignored.Add(name.Trim());
+            }
+            if (Ignored.Count == 0)
+                return false;
+
+            return Ignored.Contains(Utils.GetPrefabName(c.gameObject)) ||
+                   (Localization.instance != null && Ignored.Contains(Localization.instance.Localize(c.m_name)));
         }
     }
 
