@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.10
+
+- **IgnoredCreatures setting.** List creatures that should never count as an enemy nearby, by
+  the name shown in game or the prefab name, comma-separated. For modded creatures that are
+  hostile by faction but never fight, like T.W.I.G. Requested on GitHub.
+
 ## 1.0.9
 
 - Being over-encumbered never gets free stamina regeneration.

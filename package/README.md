@@ -32,6 +32,7 @@ mod adds is judged by the same rule.
 | `AffectBuild` | true | Build, repair, remove piece. |
 | `AffectSwim` | true | Swim drain. |
 | `AffectSneak` | true | Crouch and sneak drain. |
+| `IgnoredCreatures` | (empty) | Comma-separated creatures that never count as a hostile nearby, by in-game name or prefab name (e.g. `T.W.I.G`). |
 
 Each cost is its own switch, so you can leave combat or swimming paying full price.
 

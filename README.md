@@ -114,6 +114,8 @@ After first run, edit
 - `AffectAttacks` / `AffectSprint` / `AffectJump` / `AffectBuild` /
   `AffectSwim` / `AffectSneak` (bool, default true) — toggle each
   independently.
+- `IgnoredCreatures` (string, default empty) — comma-separated creatures that never
+  count as a hostile nearby, by in-game name or prefab name (e.g. `T.W.I.G`).
 
 Every value is read at the call site, so
 [ConfigurationManager](https://thunderstore.io/c/valheim/p/shudnal/ConfigurationManager/)
