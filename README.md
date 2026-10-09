@@ -113,7 +113,10 @@ After first run, edit
 - `SafeRadius` (float, default 25) — metres.
 - `AffectAttacks` / `AffectSprint` / `AffectJump` / `AffectBuild` /
   `AffectSwim` / `AffectSneak` (bool, default true) — toggle each
-  independently.
+  independently. `AffectBuild` covers every build tool, so planting with the
+  cultivator and the hoe are free too.
+- `AffectEncumbered` (bool, default false) — over the weight limit and safe,
+  walking costs nothing and stamina refills. Off keeps the vanilla penalty.
 - `IgnoredCreatures` (string, default empty) — comma-separated creatures that never
   count as a hostile nearby, by in-game name or prefab name (e.g. `T.W.I.G`).
 

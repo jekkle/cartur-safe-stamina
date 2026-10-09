@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
@@ -11,7 +11,7 @@ namespace CarturSafeStamina
     {
         public const string PluginGuid = "com.jekkle.valheim.cartursafestamina";
         public const string PluginName = "Cartur's Safe Stamina";
-        public const string PluginVersion = "1.0.10";
+        public const string PluginVersion = "1.0.11";
 
         public static ConfigEntry<float> SafeRadius;
         public static ConfigEntry<bool> AffectSprint;
@@ -20,6 +20,7 @@ namespace CarturSafeStamina
         public static ConfigEntry<bool> AffectSwim;
         public static ConfigEntry<bool> AffectAttacks;
         public static ConfigEntry<bool> AffectSneak;
+        public static ConfigEntry<bool> AffectEncumbered;
         public static ConfigEntry<string> IgnoredCreatures;
 
         private void Awake()
@@ -28,12 +29,15 @@ namespace CarturSafeStamina
                 "No stamina cost for sprint/jump/build/swim/attacks/sneak when no enemy is within this many meters.");
             AffectSprint = Config.Bind("General", "AffectSprint", true, "Free sprint stamina when safe.");
             AffectJump = Config.Bind("General", "AffectJump", true, "Free jump stamina when safe.");
-            AffectBuild = Config.Bind("General", "AffectBuild", true, "Free build/repair/remove stamina when safe.");
+            AffectBuild = Config.Bind("General", "AffectBuild", true,
+                "Free build/repair/remove stamina when safe. Covers every build tool, so planting with the cultivator and levelling with the hoe are free too.");
             AffectSwim = Config.Bind("General", "AffectSwim", true,
                 "Free swim stamina when safe. Note this also removes the drowning risk while safe, since drowning only starts once stamina is empty.");
             AffectAttacks = Config.Bind("General", "AffectAttacks", true,
                 "Free attack stamina when safe - chopping wood, mining, and weapon swings all pay through the same cost.");
             AffectSneak = Config.Bind("General", "AffectSneak", true, "Free sneak/crouch stamina when safe.");
+            AffectEncumbered = Config.Bind("General", "AffectEncumbered", false,
+                "Over the weight limit and safe: walking costs no stamina and stamina refills. Off by default, so being over-loaded costs you as in vanilla.");
             IgnoredCreatures = Config.Bind("General", "IgnoredCreatures", "",
                 "Comma-separated creatures that never count as an enemy nearby, by prefab name or by the name shown in game (e.g. T.W.I.G). For modded creatures that are hostile by faction but never fight.");
 
@@ -302,9 +306,10 @@ namespace CarturSafeStamina
         static bool BlockedAndAllowed(Player p)
         {
             // Vanilla zeroes regen for the whole encumbered state, moving or not, and the swim and
-            // attack branches below would otherwise bypass that - so encumbered is always vanilla.
+            // attack branches below would otherwise bypass that - so encumbered is vanilla unless
+            // AffectEncumbered asks otherwise.
             if (p.IsEncumbered())
-                return false;
+                return Plugin.AffectEncumbered.Value;
 
             if (p.IsSwimming() && !p.IsOnGround())
                 return Plugin.AffectSwim.Value;
@@ -314,5 +319,33 @@ namespace CarturSafeStamina
 
             return p.IsWallRunning();
         }
+    }
+
+    // Encumbered walking: UpdateStats spends it directly, not through an SEMan hook -
+    //
+    //     if (flag) { if (m_moveDir.magnitude > 0.1f) UseStamina(m_encumberedStaminaDrain * dt); ... }
+    //
+    // and that is the only UseStamina call inside UpdateStats (UpdateFood and
+    // UpdateEnvStatusEffects spend none). So the call is skipped by bracketing UpdateStats rather
+    // than by zeroing m_encumberedStaminaDrain around it, which is the shared-field save/restore
+    // that broke against Speedy Paths. Prefix returning false on UseStamina is a deliberate skip:
+    // the original would subtract stamina and reset the regen delay, which is the cost this setting
+    // removes. Requested on Nexus (BIOSMonkey, 2026-10-07).
+    [HarmonyPatch(typeof(Player), "UpdateStats", new[] { typeof(float) })]
+    public static class Patch_EncumberedBracket
+    {
+        internal static bool Skip;
+
+        static void Prefix(Player __instance) =>
+            Skip = Plugin.AffectEncumbered.Value && __instance == Player.m_localPlayer
+                   && __instance.IsEncumbered() && Plugin.IsSafe(__instance);
+
+        static void Finalizer() => Skip = false;
+    }
+
+    [HarmonyPatch(typeof(Player), nameof(Player.UseStamina))]
+    public static class Patch_EncumberedDrain
+    {
+        static bool Prefix() => !Patch_EncumberedBracket.Skip;
     }
 }

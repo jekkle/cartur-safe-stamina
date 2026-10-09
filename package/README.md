@@ -29,9 +29,10 @@ mod adds is judged by the same rule.
 | `AffectAttacks` | true | Chopping, mining, weapon swings. |
 | `AffectSprint` | true | Sprint drain. |
 | `AffectJump` | true | Jump cost. |
-| `AffectBuild` | true | Build, repair, remove piece. |
+| `AffectBuild` | true | Build, repair, remove piece. Every build tool, so planting with the cultivator and the hoe too. |
 | `AffectSwim` | true | Swim drain. |
 | `AffectSneak` | true | Crouch and sneak drain. |
+| `AffectEncumbered` | false | Over the weight limit: walking costs nothing and stamina refills. Off keeps the vanilla penalty. |
 | `IgnoredCreatures` | (empty) | Comma-separated creatures that never count as a hostile nearby, by in-game name or prefab name (e.g. `T.W.I.G`). |
 
 Each cost is its own switch, so you can leave combat or swimming paying full price.

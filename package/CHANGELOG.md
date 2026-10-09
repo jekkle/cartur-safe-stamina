@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.11
+
+- **AffectEncumbered setting**, off by default. On, being over the weight limit while safe
+  costs nothing to walk and stamina refills, for hauling wood and stone around the base.
+  Off keeps the vanilla penalty, as since 1.0.9. Requested on Nexus.
+- `AffectBuild` now says what it already did: planting with the cultivator and levelling with
+  the hoe go through the same build cost, so they are free when safe too.
+
 ## 1.0.10
 
 - **IgnoredCreatures setting.** List creatures that should never count as an enemy nearby, by
