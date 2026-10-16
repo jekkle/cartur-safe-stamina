@@ -1,27 +1,28 @@
 # Cartur's Safe Stamina
 
-Stamina costs nothing while nothing is hunting you.
+Stamina costs nothing while nothing hostile is near you, and the full costs return the moment something is.
 
-Chopping, mining, sprinting, jumping, swimming, sneaking, building, repairing and
-weapon swings are all free out in the quiet. Then something hostile walks into
-range and every cost comes straight back, at full price, mid-swing.
+![The settings in the ConfigurationManager panel, as of version 1.0.2. Later versions have more.](https://raw.githubusercontent.com/jekkle/cartur-safe-stamina/master/docs/images/configuration-manager.png)
 
-The bar also **refills** while you swim and while you swing — vanilla stops
-regeneration dead during both.
+## What it does
 
-![Every setting in the ConfigurationManager panel](https://raw.githubusercontent.com/jekkle/cartur-safe-stamina/master/docs/images/configuration-manager.png)
+Out in the quiet, chopping, mining, weapon swings, sprinting, jumping, swimming, sneaking, and building, repairing and removing pieces cost no stamina. Planting with the cultivator and levelling with the hoe go through the build cost, so they are free too. When a hostile character walks into range, every cost applies again at full price, even in the middle of a swing.
+
+The bar also refills in two situations where vanilla stops regeneration completely: while you swim and while you attack or dodge. This only happens when you are safe, and the swim and attack switches below control it. Skill gain is not touched by the mod.
+
+Only the local player is affected. A boar or a draugr inside your safe radius still pays for its own attacks.
 
 ## What counts as safe
 
-No hostile character within `SafeRadius` metres of you — 25 by default.
+No hostile character within `SafeRadius` metres of you, 25 by default. Dead characters do not count.
 
-Hostility is the game's own check rather than a list of prefab names, so tamed
-animals are ignored, a boar that hasn't noticed you still counts, and anything a
-mod adds is judged by the same rule.
+Hostility is the game's own enemy check (`BaseAI.IsEnemy`) rather than a list of prefab names. Tamed animals are ignored, a boar that has not noticed you still counts, and anything a mod adds is judged by the same rule. The check runs four times a second rather than every frame.
+
+If a modded creature is in an enemy faction but never fights, put it in `IgnoredCreatures` and it will stop counting.
 
 ## Settings
 
-`BepInEx/config/com.jekkle.valheim.cartursafestamina.cfg`.
+Config file: `BepInEx/config/com.jekkle.valheim.cartursafestamina.cfg`.
 
 | Setting | Default | What it does |
 | --- | --- | --- |
@@ -33,37 +34,33 @@ mod adds is judged by the same rule.
 | `AffectSwim` | true | Swim drain. |
 | `AffectSneak` | true | Crouch and sneak drain. |
 | `AffectEncumbered` | false | Over the weight limit: walking costs nothing and stamina refills. Off keeps the vanilla penalty. |
-| `IgnoredCreatures` | (empty) | Comma-separated creatures that never count as a hostile nearby, by in-game name or prefab name (e.g. `T.W.I.G`). |
+| `IgnoredCreatures` | (empty) | Comma-separated creatures that never count as a hostile nearby, by in-game name or prefab name (for example `T.W.I.G`). |
 
 Each cost is its own switch, so you can leave combat or swimming paying full price.
 
-[ConfigurationManager](https://thunderstore.io/c/valheim/p/shudnal/ConfigurationManager/)
-makes every setting adjustable in game from the F1 menu, no restart. Optional.
+[ConfigurationManager](https://thunderstore.io/c/valheim/p/shudnal/ConfigurationManager/) makes every setting adjustable in game from the F1 menu, without a restart. It is optional.
 
-## Worth knowing
+## Known issues and things to know
 
-**Free swimming also means you can't drown while safe.** The drown timer only
-starts once stamina is empty, so a swim that costs nothing never gets there. That
-is why `AffectSwim` has its own switch — turn it off if you want the water to stay
-dangerous.
+Free swimming also means you cannot drown while safe. The drown timer only starts once stamina is empty, so a swim that costs nothing never gets there. That is why `AffectSwim` has its own switch. Turn it off if you want the water to stay dangerous.
 
-**Skills still level.** Run, swim, sneak and weapon XP accrue exactly as before.
+Holding a drawn bow still costs stamina inside the safe radius. That drain does not go through the same cost as other attacks and the mod does not cover it.
 
-**Other characters pay normally.** Nothing is waived for the boar or draugr inside
-your safe radius.
+`AffectEncumbered` is off by default. Being over the weight limit costs stamina and blocks regeneration as in vanilla unless you turn it on.
 
-Mods that change stamina *amounts* stack fine — they set the number, this waives it.
+## Compatibility
+
+Mods that change stamina amounts work alongside this one. They set the number and this mod zeroes it afterwards, hooking the game's own stamina modifier calls rather than rewriting shared fields. That is how it avoids clashing with Speedy Paths, which wrapped the same value.
 
 ## Install
 
-Use a mod manager (r2modman / Thunderstore / Gale) and it pulls in BepInEx for you.
-Manually: drop `CarturSafeStamina.dll` into `BepInEx/plugins`.
+Use a mod manager (r2modman, Thunderstore or Gale) and it pulls in BepInEx for you. To install by hand, drop `CarturSafeStamina.dll` into `BepInEx/plugins`.
 
 ---
 
 *Free, and always will be. If it improved your game you can [tip me on Patreon](https://www.patreon.com/c/cartur).*
 
-**[Discord](https://discord.gg/nd5RqpwNkz)** — bug reports, install help, and mod requests.
+**[Discord](https://discord.gg/nd5RqpwNkz)**: bug reports, install help, and mod requests.
 Bug reports get their own thread so nothing is lost in a chat scroll, and requests are voted on.
 
 **More from Cartur:**
@@ -75,5 +72,4 @@ Bug reports get their own thread so nothing is lost in a chat scroll, and reques
 [UI HUD](https://thunderstore.io/c/valheim/p/Cartur/Carturs_UI_HUD/) ·
 [Waste Management](https://thunderstore.io/c/valheim/p/Cartur/Carturs_Waste_Management/) ·
 [Feeding Trough](https://thunderstore.io/c/valheim/p/Cartur/Carturs_Feeding_Trough/) ·
-[Build Camera](https://thunderstore.io/c/valheim/p/Cartur/Carturs_Build_Camera/) ·
 [Combat Text](https://thunderstore.io/c/valheim/p/Cartur/Carturs_Combat_Text/)

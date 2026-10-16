@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.12
+
+- New icon, and the README is rewritten: a fuller description of what the mod does, every setting and default checked against the code, and image captions that match the pictures. No code changes.
+
 ## 1.0.11
 
 - **AffectEncumbered setting**, off by default. On, being over the weight limit while safe
