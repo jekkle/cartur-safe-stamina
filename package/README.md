@@ -2,6 +2,8 @@
 
 Stamina costs nothing while nothing hostile is near you, and the full costs return the moment something is.
 
+![Chopping a tree with no enemies near. The stamina bar, bottom left, stays full](https://raw.githubusercontent.com/jekkle/cartur-safe-stamina/master/docs/images/ingame-stamina.jpg)
+
 ![The settings in the ConfigurationManager panel, as of version 1.0.2. Later versions have more.](https://raw.githubusercontent.com/jekkle/cartur-safe-stamina/master/docs/images/configuration-manager.png)
 
 ## What it does
