@@ -1,55 +1,77 @@
-[size=4][b]Stamina costs nothing while nothing is hunting you.[/b][/size]
+Stamina costs nothing while nothing hostile is near you, and the full costs return the moment something is.
 
-Chopping, mining, sprinting, jumping, swimming, sneaking, building, repairing and weapon swings are all free out in the quiet. Then something hostile walks into range and every cost comes straight back, at full price, mid-swing.
+[img]https://raw.githubusercontent.com/jekkle/cartur-safe-stamina/master/docs/images/ingame-stamina.jpg[/img]
 
-The bar also [b]refills[/b] while you swim and while you swing. Vanilla stops regeneration dead during both, so a free swim still left you stranded at whatever stamina you went in with; while safe it now climbs back the way it does standing still.
+[img]https://raw.githubusercontent.com/jekkle/cartur-safe-stamina/master/docs/images/configuration-manager.png[/img]
 
-[size=4][b]What counts as safe[/b][/size]
+[size=5][b]What it does[/b][/size]
 
-No hostile character within SafeRadius metres of you - 25 by default.
+Out in the quiet, chopping, mining, weapon swings, sprinting, jumping, swimming, sneaking, and building, repairing and removing pieces cost no stamina. Planting with the cultivator and levelling with the hoe go through the build cost, so they are free too. When a hostile character walks into range, every cost applies again at full price, even in the middle of a swing.
 
-Hostility is the game's own BaseAI.IsEnemy check, not a list of prefab names, so tamed animals are ignored, a boar that has not noticed you still counts, and anything a mod adds is judged by the same rule as everything else. The scan is cached for a quarter second rather than run every frame.
+The bar also refills in two situations where vanilla stops regeneration completely: while you swim and while you attack or dodge. This only happens when you are safe, and the swim and attack switches below control it. Skill gain is not touched by the mod.
 
-[size=4][b]Config[/b][/size]
+Only the local player is affected. A boar or a draugr inside your safe radius still pays for its own attacks.
 
-BepInEx/config/com.jekkle.valheim.cartursafestamina.cfg, written on first run.
+[size=5][b]What counts as safe[/b][/size]
+
+No hostile character within SafeRadius metres of you, 25 by default. Dead characters do not count.
+
+Hostility is the game's own enemy check (BaseAI.IsEnemy) rather than a list of prefab names. Tamed animals are ignored, a boar that has not noticed you still counts, and anything a mod adds is judged by the same rule. The check runs four times a second rather than every frame.
+
+If a modded creature is in an enemy faction but never fights, put it in IgnoredCreatures and it will stop counting.
+
+[size=5][b]Settings[/b][/size]
+
+Config file: BepInEx/config/com.jekkle.valheim.cartursafestamina.cfg.
 
 [list]
-[*][b]SafeRadius[/b] (25) - metres. How close a hostile has to be before costs return.[/*]
-[*][b]AffectAttacks[/b] (true) - chopping, mining, weapon swings.[/*]
-[*][b]AffectSprint[/b] (true) - sprint drain.[/*]
-[*][b]AffectJump[/b] (true) - jump cost.[/*]
-[*][b]AffectBuild[/b] (true) - build, repair, remove piece.[/*]
-[*][b]AffectSwim[/b] (true) - swim drain.[/*]
-[*][b]AffectSneak[/b] (true) - crouch and sneak drain.[/*]
+[*][b]SafeRadius[/b] (25) - Metres. How close a hostile has to be before costs return.[/*]
+[*][b]AffectAttacks[/b] (true) - Chopping, mining, weapon swings.[/*]
+[*][b]AffectSprint[/b] (true) - Sprint drain.[/*]
+[*][b]AffectJump[/b] (true) - Jump cost.[/*]
+[*][b]AffectBuild[/b] (true) - Build, repair, remove piece. Every build tool, so planting with the cultivator and the hoe too.[/*]
+[*][b]AffectSwim[/b] (true) - Swim drain.[/*]
+[*][b]AffectSneak[/b] (true) - Crouch and sneak drain.[/*]
+[*][b]AffectEncumbered[/b] (false) - Over the weight limit: walking costs nothing and stamina refills. Off keeps the vanilla penalty.[/*]
+[*][b]IgnoredCreatures[/b] ((empty)) - Comma-separated creatures that never count as a hostile nearby, by in-game name or prefab name (for example T.W.I.G).[/*]
 [/list]
 
-Each cost is its own switch, so you can leave combat or swimming paying full price if you would rather. ConfigurationManager makes every setting adjustable in game from the F1 menu, no restart needed. It is optional; this mod does not depend on it.
+Each cost is its own switch, so you can leave combat or swimming paying full price.
 
-[size=4][b]Worth knowing[/b][/size]
+[url=https://thunderstore.io/c/valheim/p/shudnal/ConfigurationManager/]ConfigurationManager[/url] makes every setting adjustable in game from the F1 menu, without a restart. It is optional.
 
-[b]Free swimming also means you cannot drown while safe.[/b] The game only starts the drown timer once stamina is empty, so a swim that never costs anything never gets there. That follows from the premise rather than being bolted on, and it is why AffectSwim has its own switch - turn it off if you want the water to stay dangerous.
+[size=5][b]Known issues and things to know[/b][/size]
 
-[b]Skills still level.[/b] Nothing here skips the original methods, so run, swim, sneak and weapon XP accrue exactly as they always did.
+Free swimming also means you cannot drown while safe. The drown timer only starts once stamina is empty, so a swim that costs nothing never gets there. That is why AffectSwim has its own switch. Turn it off if you want the water to stay dangerous.
 
-[b]Other characters pay normally.[/b] The attack patch checks the swinger is you before waiving anything - otherwise every boar and draugr inside your safe radius would swing for free too, which is precisely when they would benefit.
+Holding a drawn bow still costs stamina inside the safe radius. That drain does not go through the same cost as other attacks and the mod does not cover it.
 
-[size=4][b]Compatibility[/b][/size]
+AffectEncumbered is off by default. Being over the weight limit costs stamina and blocks regeneration as in vanilla unless you turn it on.
 
-Nothing is replaced outright: every patch either zeroes a cost the game is about to charge or restores what it borrowed. Mods that change stamina [i]amounts[/i] stack fine - they set the number, this waives it.
+[size=5][b]Compatibility[/b][/size]
 
-[size=4][b]Installation[/b][/size]
+Mods that change stamina amounts work alongside this one. They set the number and this mod zeroes it afterwards, hooking the game's own stamina modifier calls rather than rewriting shared fields. That is how it avoids clashing with Speedy Paths, which wrapped the same value.
 
-Requires BepInEx. Unpack into your Valheim folder so the DLL lands in BepInEx/plugins.
+[size=5][b]Install[/b][/size]
 
-[size=4][b]More from Cartur[/b][/size]
+Use a mod manager (r2modman, Thunderstore or Gale) and it pulls in BepInEx for you. To install by hand, drop CarturSafeStamina.dll into BepInEx/plugins.
 
-[url=https://www.nexusmods.com/valheim/mods/3679]HD Blood[/url] - higher resolution ground blood and a real burst on every hit.
+[size=5][b]Discord[/b][/size]
+[url=https://discord.gg/nd5RqpwNkz]Cartur's Mods Discord[/url] - bug reports, install help, and mod requests. Bug reports get their own thread so nothing is lost, and requests are voted on.
+
+[size=5][b]More from Cartur[/b][/size]
+
+[url=https://www.nexusmods.com/valheim/mods/3679]HD Blood[/url] - higher resolution ground blood, and a real burst of blood on every hit and kill.
 [url=https://www.nexusmods.com/valheim/mods/3681]Map Pins[/url] - pins the world onto your map as you explore it.
 [url=https://www.nexusmods.com/valheim/mods/3684]Compass and Clock[/url] - a compass bar across the top of the screen.
 [url=https://www.nexusmods.com/valheim/mods/3728]Follow Command[/url] - every tamed animal takes the follow command.
 [url=https://www.nexusmods.com/valheim/mods/3760]Flooring[/url] - floors keep the rain off, and fires sit on them.
 [url=https://www.nexusmods.com/valheim/mods/3779]UI - HUD[/url] - a hand-drawn bronze HUD you can arrange in game.
 [url=https://www.nexusmods.com/valheim/mods/3888]Waste Management[/url] - a trash can and a sort button in the inventory.
+[url=https://www.nexusmods.com/valheim/mods/4010]Feeding Trough[/url] - a trough your animals eat out of.
+[url=https://www.nexusmods.com/valheim/mods/4088]Combat Text[/url] - bigger damage numbers and a fast crit pop.
+[url=https://www.nexusmods.com/valheim/mods/4389]Farming[/url] - faster crops, bigger harvests, and whole fields planted at once.
+[url=https://www.nexusmods.com/valheim/mods/4390]Mining[/url] - harder pickaxe hits, more ore, and deposits that shatter.
+[url=https://www.nexusmods.com/valheim/mods/4391]Sailing[/url] - a Sailing skill: faster ships, tougher hulls, a wider map reveal.
 
 Free, and always will be - if it improved your game you can [url=https://www.patreon.com/c/cartur]tip me on Patreon[/url].
